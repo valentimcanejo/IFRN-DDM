@@ -50,14 +50,14 @@ export async function POST(request: Request, response: Response) {
     const collectionRef = collection(db, "items");
 
     const requestBody = await request.json();
-    const { name, description, imageUrl } = requestBody; // Extracting "name" and "imageUrl" from the request body
+    const { name, description, imageUrl, idNum } = requestBody; // Extracting "name" and "imageUrl" from the request body
 
     if (!name || !imageUrl) {
       return new Response("Os dados fornecidos são incompletos.", {
         status: 400,
       });
     }
-    const idDoc = await addDoc(collectionRef, { name, description });
+    const idDoc = await addDoc(collectionRef, { name, description, idNum });
 
     // Upload the image to Firebase Storage
     const imageBuffer = Buffer.from(imageUrl, "base64");
