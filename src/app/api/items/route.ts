@@ -1,4 +1,4 @@
-import db from "@/firebase/initFirebase";
+import db, { storage } from "@/firebase/initFirebase";
 import {
   addDoc,
   collection,
@@ -8,6 +8,12 @@ import {
   getDocs,
   updateDoc,
 } from "firebase/firestore";
+import {
+  getDownloadURL,
+  ref,
+  uploadBytes,
+  uploadString,
+} from "firebase/storage";
 import { NextResponse } from "next/server";
 
 interface ResponseStructure {
@@ -37,28 +43,46 @@ export async function GET(request: Request, response: Response) {
   }
 }
 
+// Your imports here...
+
 export async function POST(request: Request, response: Response) {
   try {
     const collectionRef = collection(db, "items");
 
     const requestBody = await request.json();
-    console.log(requestBody.nome);
+    const { name, description, imageUrl } = requestBody; // Extracting "name" and "imageUrl" from the request body
 
-    if (!requestBody.name) {
+    if (!name || !imageUrl) {
       return new Response("Os dados fornecidos são incompletos.", {
         status: 400,
       });
     }
+    const idDoc = await addDoc(collectionRef, { name, description, imageUrl });
 
-    await addDoc(collectionRef, requestBody);
+    // Upload the image to Firebase Storage
+    const imageBuffer = Buffer.from(imageUrl, "base64");
+
+    const imageRef = ref(storage, `${idDoc.id}`);
+
+    await uploadString(imageRef, imageUrl, "base64", {
+      contentType: "image/png",
+    });
+
+    console.log(idDoc);
+    const downloadURL = await getDownloadURL(imageRef);
+
+    console.log("Image URL:", downloadURL);
+    // Save the item data to Firestore
 
     return NextResponse.json({
-      data: requestBody,
+      data: { name },
       statusCode: 200,
       status: "OK",
       message: "Item adicionado",
     });
   } catch (error: any) {
+    console.log(error);
+
     return new Response(null, { status: 500 });
   }
 }
