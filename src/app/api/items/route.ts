@@ -44,7 +44,7 @@ export async function POST(request: Request, response: Response) {
     const requestBody = await request.json();
     console.log(requestBody.nome);
 
-    if (!requestBody.nome || !requestBody.preco) {
+    if (!requestBody.name) {
       return new Response("Os dados fornecidos são incompletos.", {
         status: 400,
       });
