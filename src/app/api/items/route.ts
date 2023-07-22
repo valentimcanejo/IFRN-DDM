@@ -57,7 +57,7 @@ export async function POST(request: Request, response: Response) {
         status: 400,
       });
     }
-    const idDoc = await addDoc(collectionRef, { name, description, imageUrl });
+    const idDoc = await addDoc(collectionRef, { name, description });
 
     // Upload the image to Firebase Storage
     const imageBuffer = Buffer.from(imageUrl, "base64");
@@ -72,6 +72,10 @@ export async function POST(request: Request, response: Response) {
     const downloadURL = await getDownloadURL(imageRef);
 
     console.log("Image URL:", downloadURL);
+    const itemRef = doc(db, "items", idDoc.id);
+    await updateDoc(itemRef, {
+      imageUrl: downloadURL,
+    });
     // Save the item data to Firestore
 
     return NextResponse.json({
