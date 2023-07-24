@@ -43,14 +43,12 @@ export async function GET(request: Request, response: Response) {
   }
 }
 
-// Your imports here...
-
 export async function POST(request: Request, response: Response) {
   try {
     const collectionRef = collection(db, "items");
 
     const requestBody = await request.json();
-    const { name, description, imageUrl, idNum } = requestBody; // Extracting "name" and "imageUrl" from the request body
+    const { name, description, imageUrl, idNum } = requestBody;
 
     if (!name || !imageUrl) {
       return new Response("Os dados fornecidos são incompletos.", {
@@ -58,9 +56,6 @@ export async function POST(request: Request, response: Response) {
       });
     }
     const idDoc = await addDoc(collectionRef, { name, description, idNum });
-
-    // Upload the image to Firebase Storage
-    const imageBuffer = Buffer.from(imageUrl, "base64");
 
     const imageRef = ref(storage, `${idDoc.id}`);
 
@@ -76,7 +71,6 @@ export async function POST(request: Request, response: Response) {
     await updateDoc(itemRef, {
       imageUrl: downloadURL,
     });
-    // Save the item data to Firestore
 
     return NextResponse.json({
       data: { name },
